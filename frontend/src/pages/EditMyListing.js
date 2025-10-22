@@ -34,8 +34,23 @@ export default function EditMyListing(){
     loadProperties();
   }, [user, navigate]);
 
-  const handleEdit = (propId) => {
-    navigate(`/host/list-property?edit=${propId}`);
+  const handleEdit = (prop) => {
+    const completionStatus = prop.completionStatus;
+    
+    // If all steps are complete, go to edit form
+    if (completionStatus?.basicInfo && completionStatus?.images && completionStatus?.pricing && completionStatus?.razorpay) {
+      navigate(`/host/list-property?edit=${prop._id}`);
+      return;
+    }
+    
+    // If Razorpay is not complete, go to onboarding
+    if (!completionStatus?.razorpay) {
+      navigate(`/host/onboard?propertyId=${prop._id}`);
+      return;
+    }
+    
+    // For any other incomplete step, go to edit form
+    navigate(`/host/list-property?edit=${prop._id}`);
   };
 
   const handleDelete = async (propId) => {
@@ -243,7 +258,7 @@ export default function EditMyListing(){
                     {/* Actions */}
                     <div className="flex gap-2">
                       <button
-                        onClick={() => handleEdit(prop._id)}
+                        onClick={() => handleEdit(prop)}
                         className="flex-1 bg-blue-500 text-white py-2 rounded font-semibold hover:bg-blue-600 text-sm"
                       >
                         Edit
