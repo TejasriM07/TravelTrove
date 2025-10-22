@@ -1,10 +1,27 @@
 const Razorpay = require('razorpay');
 require('dotenv').config();
 
-const instance = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+// Lazy-load Razorpay instance only when keys are available
+let instance = null;
+
+const getRazorpayInstance = () => {
+  if (!instance) {
+    const keyId = process.env.RAZORPAY_KEY_ID;
+    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    
+    if (!keyId || !keySecret) {
+      console.warn('⚠️  Razorpay keys not configured. Payments will not work. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.');
+      return null;
+    }
+    
+    instance = new Razorpay({
+      key_id: keyId,
+      key_secret: keySecret,
+    });
+    console.log('✅ Razorpay instance initialized');
+  }
+  return instance;
+};
 
 /**
  * Create an order using Razorpay. To payout directly to a host, you'll need to
@@ -15,12 +32,15 @@ const instance = new Razorpay({
  * transfer/payout logic once hosts are onboarded.
  */
 exports.createOrder = async ({ amount, currency = 'INR', receipt }) => {
+  const razorpay = getRazorpayInstance();
+  if (!razorpay) throw new Error('Razorpay is not configured');
+  
   const options = {
     amount: Math.round(amount * 100), // in paise
     currency,
     receipt: receipt || `rcpt_${Date.now()}`,
   };
-  return instance.orders.create(options);
+  return razorpay.orders.create(options);
 };
 
 exports.verifyWebhook = (body, signature) => {
@@ -36,6 +56,10 @@ exports.verifyWebhook = (body, signature) => {
  */
 exports.transferToHost = async ({ amount, currency = 'INR', hostAccountId, bookingId }) => {
   if (!hostAccountId) throw new Error('No hostAccountId provided');
+  
+  const razorpay = getRazorpayInstance();
+  if (!razorpay) throw new Error('Razorpay is not configured');
+  
   // Example transfer object — modify based on your Razorpay Connect setup
   const transfer = {
     account: hostAccountId,
@@ -45,8 +69,8 @@ exports.transferToHost = async ({ amount, currency = 'INR', hostAccountId, booki
   };
   // instance.payments or instance.transfers may be used in different APIs.
   // Here we try to call a generic transfers API; if not available this will fail
-  if (typeof instance.transfers === 'function') {
-    return instance.transfers.create(transfer);
+  if (typeof razorpay.transfers === 'function') {
+    return razorpay.transfers.create(transfer);
   }
   // Fallback: log and return a resolved promise to avoid blocking.
   console.warn('transfers API not available on this Razorpay instance; implement Connect transfers/payouts here');
