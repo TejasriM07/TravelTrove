@@ -6,7 +6,9 @@ import Home from './pages/Home';
 import MyBooking from './pages/MyBooking';
 import Profile from './pages/Profile';
 import PropertyDetails from './pages/PropertyDetails';
+import BookingConfirmation from './pages/BookingConfirmation';
 import HostHome from './pages/HostHome';
+import HostBookings from './pages/HostBookings';
 import OnboardHost from './pages/OnboardHost';
 import ListProperty from './pages/ListProperty';
 import EditMyListing from './pages/EditMyListing';
@@ -41,6 +43,7 @@ export default function App(){
             <Route path='/' element={<Landing/>} />
             <Route path='/home' element={<Home/>} />
             <Route path='/my-bookings' element={<MyBooking/>} />
+            <Route path='/booking/:propertyId' element={<BookingConfirmation/>} />
             <Route path='/profile' element={<Profile/>} />
             <Route path='/property-details/:id' element={<PropertyDetails/>} />
             <Route path='/about' element={<About/>} />
@@ -51,6 +54,7 @@ export default function App(){
             <Route path='/host/onboard' element={<OnboardHost/>} />
             <Route path='/host/list-property' element={<ListProperty/>} />
             <Route path='/host/edit-my-listing' element={<EditMyListing/>} />
+            <Route path='/host/bookings' element={<HostBookings/>} />
           </Routes>
         </main>
       </div>

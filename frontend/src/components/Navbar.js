@@ -114,6 +114,7 @@ export default function Navbar(){
       <Link to="/host" className="text-gray-700 hover:text-teal-600 font-medium transition">Host Dashboard</Link>
       <Link to="/host/list-property" className="text-gray-700 hover:text-teal-600 font-medium transition">List Property</Link>
       <Link to="/host/edit-my-listing" className="text-gray-700 hover:text-teal-600 font-medium transition">My Listings</Link>
+      <Link to="/host/bookings" className="text-gray-700 hover:text-teal-600 font-medium transition">Bookings</Link>
       <Link to="/about" className="text-gray-700 hover:text-teal-600 font-medium transition">About</Link>
       <Link to="/profile" className="flex items-center gap-2 hover:opacity-80 transition">
         <span className="text-teal-600 font-bold">{user?.name}</span>
@@ -133,6 +134,7 @@ export default function Navbar(){
         <Link to="/host" onClick={() => setMobileMenuOpen(false)} className="text-gray-700 hover:text-teal-600 font-medium transition py-3 border-b border-gray-200">Host Dashboard</Link>
         <Link to="/host/list-property" onClick={() => setMobileMenuOpen(false)} className="text-gray-700 hover:text-teal-600 font-medium transition py-3 border-b border-gray-200">List Property</Link>
         <Link to="/host/edit-my-listing" onClick={() => setMobileMenuOpen(false)} className="text-gray-700 hover:text-teal-600 font-medium transition py-3 border-b border-gray-200">My Listings</Link>
+        <Link to="/host/bookings" onClick={() => setMobileMenuOpen(false)} className="text-gray-700 hover:text-teal-600 font-medium transition py-3 border-b border-gray-200">Bookings</Link>
         <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="text-gray-700 hover:text-teal-600 font-medium transition py-3 border-b border-gray-200">About</Link>
         <Link to="/profile" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 text-gray-700 hover:text-teal-600 font-medium transition py-3">
           <span>{user?.name}</span>

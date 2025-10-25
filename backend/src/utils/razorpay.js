@@ -1,4 +1,5 @@
 const Razorpay = require('razorpay');
+const MockRazorpay = require('./mockRazorpay');
 require('dotenv').config();
 
 // Lazy-load Razorpay instance only when keys are available
@@ -6,11 +7,18 @@ let instance = null;
 
 const getRazorpayInstance = () => {
   if (!instance) {
+    // Check if in test mode
+    if (process.env.RAZORPAY_TEST_MODE === 'true' || process.env.RAZORPAY_TEST_MODE === true) {
+      console.log('🧪 Using MOCK Razorpay (TEST MODE)');
+      instance = new MockRazorpay();
+      return instance;
+    }
+
     const keyId = process.env.RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
     
     if (!keyId || !keySecret) {
-      console.warn('⚠️  Razorpay keys not configured. Payments will not work. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.');
+      console.warn('⚠️  Razorpay keys not configured. Set RAZORPAY_TEST_MODE=true for testing, or add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.');
       return null;
     }
     
@@ -18,7 +26,7 @@ const getRazorpayInstance = () => {
       key_id: keyId,
       key_secret: keySecret,
     });
-    console.log('✅ Razorpay instance initialized');
+    console.log('✅ Razorpay instance initialized with real API keys');
   }
   return instance;
 };
@@ -33,7 +41,7 @@ const getRazorpayInstance = () => {
  */
 exports.createOrder = async ({ amount, currency = 'INR', receipt }) => {
   const razorpay = getRazorpayInstance();
-  if (!razorpay) throw new Error('Razorpay is not configured');
+  if (!razorpay) throw new Error('Razorpay is not configured. Set RAZORPAY_TEST_MODE=true or add real Razorpay keys.');
   
   const options = {
     amount: Math.round(amount * 100), // in paise
@@ -72,6 +80,11 @@ exports.transferToHost = async ({ amount, currency = 'INR', hostAccountId, booki
   if (typeof razorpay.transfers === 'function') {
     return razorpay.transfers.create(transfer);
   }
+  
+  if (typeof razorpay.transfers?.create === 'function') {
+    return razorpay.transfers.create(transfer);
+  }
+  
   // Fallback: log and return a resolved promise to avoid blocking.
   console.warn('transfers API not available on this Razorpay instance; implement Connect transfers/payouts here');
   return Promise.resolve({ ok: true });

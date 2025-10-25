@@ -4,11 +4,26 @@ const fs = require('fs');
 
 // Helper function to calculate completion status
 const updateCompletionStatus = (prop) => {
+  // Check pricing based on property type
+  let pricingComplete = false;
+  
+  if (prop.type === 'House for Rent') {
+    // For rental properties, check if rental type pricing is filled
+    if (prop.rentalType === 'Rent') {
+      pricingComplete = !!(prop.monthlyPrice && prop.monthlyPrice > 0);
+    } else if (prop.rentalType === 'Lease') {
+      pricingComplete = !!(prop.leasePrice && prop.leasePrice > 0 && prop.advanceAmount && prop.advanceAmount > 0 && prop.leaseTimeLimit && prop.leaseTimeLimit > 0);
+    }
+  } else {
+    // For hotels, resorts, villas - check pricePerDay
+    pricingComplete = !!(prop.pricePerDay && prop.pricePerDay > 0);
+  }
+
   const status = {
     basicInfo: !!(prop.name && prop.type && prop.state && prop.city && prop.address),
     images: !!(prop.images && prop.images.length >= 5),
-    pricing: !!(prop.pricePerDay || prop.monthlyPrice),
-    razorpay: !!(prop.razorpayPaymentId) // This would be checked if host has linked Razorpay
+    pricing: pricingComplete,
+    razorpay: !!(prop.razorpayPaymentId) // Optional: Razorpay - hosts can list without it
   };
   prop.completionStatus = status;
   return prop;

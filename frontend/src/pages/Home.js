@@ -76,8 +76,21 @@ export default function Home(){
   const handleFilter = () => {
     let filtered = properties;
     if (searchLocation) filtered = filtered.filter(p => p.city?.toLowerCase().includes(searchLocation.toLowerCase()));
-    if (minPrice) filtered = filtered.filter(p => p.pricePerDay >= parseInt(minPrice));
-    if (maxPrice) filtered = filtered.filter(p => p.pricePerDay <= parseInt(maxPrice));
+    
+    // Filter by price - check all price types
+    if (minPrice) {
+      filtered = filtered.filter(p => {
+        const price = p.pricePerDay || p.monthlyPrice || p.leasePrice || 0;
+        return price >= parseInt(minPrice);
+      });
+    }
+    if (maxPrice) {
+      filtered = filtered.filter(p => {
+        const price = p.pricePerDay || p.monthlyPrice || p.leasePrice || 0;
+        return price <= parseInt(maxPrice);
+      });
+    }
+    
     if (guests) filtered = filtered.filter(p => p.maxGuests >= parseInt(guests));
     setFilteredProperties(filtered);
   };
@@ -98,7 +111,17 @@ export default function Home(){
       <div className="p-4">
         <h3 className="font-semibold text-gray-900 line-clamp-2">{prop.name}</h3>
         <p className="text-sm text-gray-600">{prop.city}, {prop.state}</p>
-        <p className="text-teal-600 font-bold mt-2">₹{prop.pricePerDay}/day</p>
+        <p className="text-teal-600 font-bold mt-2">
+          {prop.pricePerDay ? (
+            <>₹{prop.pricePerDay}/day</>
+          ) : prop.monthlyPrice ? (
+            <>₹{prop.monthlyPrice}/month</>
+          ) : prop.leasePrice ? (
+            <>₹{prop.leasePrice} (Lease)</>
+          ) : (
+            <>Price on request</>
+          )}
+        </p>
         <button 
           onClick={() => navigate(`/property-details/${prop._id}`)}
           className="mt-3 w-full bg-teal-600 text-white py-2 rounded font-semibold hover:bg-teal-700 transition cursor-pointer"

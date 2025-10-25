@@ -15,6 +15,11 @@ export default function ListProperty(){
   const [images, setImages] = useState([]);
   const [message, setMessage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isFullEdit, setIsFullEdit] = useState(false);
+  const [razorpayDetails, setRazorpayDetails] = useState({
+    razorpayPaymentId: '',
+    razorpayAccountId: ''
+  });
 
   const facilityOptions = ['AC', 'Non-AC', 'Swimming Pool', 'WiFi', 'Parking', 'Restaurant', 'Spa', 'Gym'];
   const stateOptions = ['Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Others'];
@@ -68,6 +73,10 @@ export default function ListProperty(){
       return;
     }
     if (editId) {
+      const params = new URLSearchParams(location.search);
+      const isFull = params.get('full') === 'true';
+      setIsFullEdit(isFull);
+      
       const load = async () => {
         try {
           const res = await api.get('/properties/' + editId);
@@ -81,6 +90,13 @@ export default function ListProperty(){
             maxGuests: p.maxGuests || 1, bedrooms: p.bedrooms || '1 BHK', 
             facilities: p.facilities || [], available: p.available !== false, customCity: ''
           });
+          // Set Razorpay details if in full edit mode
+          if (isFull) {
+            setRazorpayDetails({
+              razorpayPaymentId: p.razorpayPaymentId || '',
+              razorpayAccountId: p.razorpayAccountId || ''
+            });
+          }
         } catch (e) {
           console.error('Failed to load property', e.message);
         }
@@ -445,14 +461,54 @@ export default function ListProperty(){
             )}
           </div>
 
-          {/* Submit */}
-          <button 
-            type="submit"
-            disabled={loading}
-            className="w-full bg-teal-600 text-white py-3 rounded font-semibold hover:bg-teal-700 disabled:bg-gray-400"
-          >
-            {loading ? 'Submitting...' : 'Submit Listing'}
-          </button>
+          {/* Razorpay Details (Full Edit Only) */}
+          {isFullEdit && (
+            <div className="bg-blue-50 p-4 rounded border border-blue-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Details</h3>
+              <div className="space-y-4">
+                {razorpayDetails.razorpayPaymentId && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Razorpay Payment ID (Completed)</label>
+                    <div className="w-full px-4 py-2 border border-gray-300 rounded bg-gray-100 text-gray-700">
+                      {razorpayDetails.razorpayPaymentId}
+                    </div>
+                  </div>
+                )}
+                {razorpayDetails.razorpayAccountId && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Razorpay Account ID (Completed)</label>
+                    <div className="w-full px-4 py-2 border border-gray-300 rounded bg-gray-100 text-gray-700">
+                      {razorpayDetails.razorpayAccountId}
+                    </div>
+                  </div>
+                )}
+                {!razorpayDetails.razorpayPaymentId && !razorpayDetails.razorpayAccountId && (
+                  <div className="text-gray-600 text-sm">
+                    No payment details completed yet. Go to the Complete button to set up payment information.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Submit & Razorpay Setup */}
+          <div className="space-y-3">
+            <button 
+              type="submit"
+              disabled={loading}
+              className="w-full bg-teal-600 text-white py-3 rounded font-semibold hover:bg-teal-700 disabled:bg-gray-400"
+            >
+              {loading ? 'Submitting...' : 'Submit Listing'}
+            </button>
+            
+            <button 
+              type="button"
+              onClick={() => navigate('/host/onboard')}
+              className="w-full bg-blue-500 text-white py-3 rounded font-semibold hover:bg-blue-600 text-sm"
+            >
+              + Add Razorpay (Optional)
+            </button>
+          </div>
         </form>
       </div>
     </div>
