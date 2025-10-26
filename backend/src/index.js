@@ -40,8 +40,10 @@ mongoose.connect(MONGO_URI, {
   console.log('Connected to MongoDB');
   console.log(`Server running on port ${PORT}`);
   console.log(`CORS enabled for: ${allowedOrigins.join(', ')}`);
-  app.listen(PORT, () => {
-    console.log(`🚀 Backend API running at http://localhost:${PORT}`);
+  // Listen on 0.0.0.0 to accept connections from any interface (required for Render)
+  app.listen(PORT, '0.0.0.0', () => {
+    const host = process.env.NODE_ENV === 'production' ? 'production server' : `http://localhost:${PORT}`;
+    console.log(`🚀 Backend API running at ${host}`);
   });
 }).catch(err => {
   console.error('Failed to connect to MongoDB', err);
