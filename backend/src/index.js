@@ -30,22 +30,54 @@ app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
 app.use('/api/bookings', bookingRoutes);
 
+// Health check endpoint (doesn't require DB)
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    message: 'Backend is running',
+    mongoConnected: mongoose.connection.readyState === 1
+  });
+});
+
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'TravelTrove Backend API',
+    status: 'running'
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/travel_trove';
 
+// Start server immediately (don't wait for MongoDB connection)
+const server = app.listen(PORT, '0.0.0.0', () => {
+  const host = process.env.NODE_ENV === 'production' ? 'production server' : `http://localhost:${PORT}`;
+  console.log(`🚀 Backend API running at ${host}`);
+  console.log(`Server started on port ${PORT}`);
+  console.log(`CORS enabled for: ${allowedOrigins.join(', ')}`);
+});
+
+// Connect to MongoDB (non-blocking)
 mongoose.connect(MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-}).then(() => {
-  console.log('Connected to MongoDB');
-  console.log(`Server running on port ${PORT}`);
-  console.log(`CORS enabled for: ${allowedOrigins.join(', ')}`);
-  // Listen on 0.0.0.0 to accept connections from any interface (required for Render)
-  app.listen(PORT, '0.0.0.0', () => {
-    const host = process.env.NODE_ENV === 'production' ? 'production server' : `http://localhost:${PORT}`;
-    console.log(`🚀 Backend API running at ${host}`);
+})
+.then(() => {
+  console.log('✅ Connected to MongoDB');
+})
+.catch(err => {
+  console.error('❌ Failed to connect to MongoDB:', err.message);
+  console.warn('⚠️  Server is running but database is not connected');
+  console.warn('⚠️  Some features may not work until MongoDB is connected');
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    console.log('Server closed');
+    mongoose.connection.close();
+    process.exit(0);
   });
-}).catch(err => {
-  console.error('Failed to connect to MongoDB', err);
-  process.exit(1);
 });
