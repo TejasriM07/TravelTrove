@@ -17,12 +17,27 @@ const allowedOrigins = [
   'http://localhost:3000',      // Local development
   'http://localhost:5000',      // Local backend
   'http://127.0.0.1:3000',      // Local development alt
+  'http://127.0.0.1:5000',      // Local backend alt
   process.env.FRONTEND_URL,     // Frontend URL from env (e.g., Netlify deployed)
   process.env.REACT_APP_FRONTEND_URL, // Alternative env variable name
 ].filter(Boolean); // Remove undefined values
 
+console.log('✅ CORS Allowed Origins:', allowedOrigins);
+
 app.use(cors({ 
-  origin: allowedOrigins, 
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Check if origin is in whitelist
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      // In production, log all attempts for debugging
+      console.warn(`⚠️  CORS blocked request from origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true 
 }));
 
