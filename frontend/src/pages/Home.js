@@ -2,6 +2,12 @@ import React, { useEffect, useState, useContext } from 'react';
 import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../utils/authContext';
+import newDelhiImg from '../assets/New Delhi, India.jpg';
+import bangaloreImg from '../assets/banglore.jpg';
+import mumbaiImg from '../assets/mumbai.jpg';
+import chennaiImg from '../assets/chennai.jpg';
+import hyderabadImg from '../assets/charminar-6925617_1280.jpg';
+import gurgaonImg from '../assets/gurgaon.jpg';
 
 export default function Home(){
   const { user } = useContext(AuthContext);
@@ -18,32 +24,32 @@ export default function Home(){
   const locations = [
     {
       name: 'New Delhi',
-      image: 'https://images.unsplash.com/photo-1518684029980-cf91b2c399cc?w=400&h=300&fit=crop',
+      image: newDelhiImg,
       properties: 3607
     },
     {
       name: 'Bengaluru',
-      image: 'https://images.unsplash.com/photo-1625881511001-4bcc5c725eef?w=800&h=600&fit=crop',
+      image: bangaloreImg,
       properties: 3118
     },
     {
       name: 'Mumbai',
-      image: 'https://images.unsplash.com/photo-1570144611938-7eac8b555eae?w=400&h=300&fit=crop',
+      image: mumbaiImg,
       properties: 1884
     },
     {
       name: 'Chennai',
-      image: 'https://images.unsplash.com/photo-1599661046289-e31897846ca7?w=400&h=300&fit=crop',
+      image: chennaiImg,
       properties: 1324
     },
     {
       name: 'Hyderabad',
-      image: 'https://images.unsplash.com/photo-1596215012519-7118e69baeb9?w=400&h=300&fit=crop',
+      image: hyderabadImg,
       properties: 1815
     },
     {
       name: 'Gurgaon',
-      image: 'https://images.unsplash.com/photo-1597893228284-ea3277c1c8f0?w=400&h=300&fit=crop',
+      image: gurgaonImg,
       properties: 1579
     }
   ];
